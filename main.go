@@ -31,18 +31,22 @@ func init() {
 func main() {
 
 	// Executor
+	log.Println("Creating executor information")
 	exec := prepareExecutorInfo()
 
 	// create our scheduler
+	log.Println("Creating scheduler")
 	scheduler := NewScheduler(exec)
 
 	// Framework
+	log.Println("Creating framework info")
 	fwinfo := &mesos.FrameworkInfo{
 		User: proto.String(""), // Mesos-go will fill in user.
 		Name: proto.String("Moroccron " + VERSION),
 	}
 
 	// Scheduler Driver
+	log.Println("Creating scheduler driver config")
 	config := sched.DriverConfig{
 		Scheduler:  scheduler,
 		Framework:  fwinfo,
@@ -50,13 +54,15 @@ func main() {
 		Credential: (*mesos.Credential)(nil),
 	}
 
+	log.Println("Creating new scheduler driver from config")
 	driver, err := sched.NewMesosSchedulerDriver(config)
 
 	if err != nil {
-		log.Fatal("Unable to create a SchedulerDriver: %v\n", err.Error())
-		//os.Exit(3)
+		log.Fatalf("Unable to create a SchedulerDriver: %v\n", err.Error())
+		os.Exit(3)
 	}
 
+	log.Println("Starting scheduler driver")
 	if stat, err := driver.Run(); err != nil {
 		log.Fatalf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
 		os.Exit(4)
