@@ -14,15 +14,15 @@ type Scheduler struct {
 	tasksLaunched int
 	tasksFinished int
 	totalTasks    int
-	//images        []string
+	JobsCh        chan string
 }
 
-func NewScheduler(exec *mesos.ExecutorInfo) *Scheduler {
-
+func NewScheduler(exec *mesos.ExecutorInfo, ch chan string) *Scheduler {
 	return &Scheduler{
 		executor:      exec,
 		tasksLaunched: 0,
 		tasksFinished: 0,
+		JobsCh:        ch,
 	}
 }
 
@@ -41,7 +41,16 @@ func (sched *Scheduler) Disconnected(sched.SchedulerDriver) {
 func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
 	logOffers(offers)
 
-	if sched.tasksLaunched >= sched.totalTasks {
+	// see if we have any jobs waiting to run. for now, just use a channel full of jobs
+	select {
+	case x, ok := <-sched.JobsCh:
+		if ok {
+			log.Infoln("Value %d was read.\n", x)
+		} else {
+			log.Infoln("Channel closed!")
+		}
+	default:
+		log.Infoln("Nothing in channel to launch")
 		return
 	}
 

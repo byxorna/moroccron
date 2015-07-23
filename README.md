@@ -3,6 +3,8 @@ mesos + cron = moroccron
 
 This is horrible and broken and probably wont even compile. Don't use it.
 
+This is just a playground to see how easy it is to make a mesos framework.
+
 ## Features (wishful thinking)
 
 * HA with master election

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"time"
 
 	"github.com/gogo/protobuf/proto"
 
@@ -33,10 +34,23 @@ func main() {
 	// Executor
 	log.Println("Creating executor information")
 	exec := prepareExecutorInfo()
+	log.Printf("Created executor info %+v\n", exec)
+
+	// create a channel where we send jobs
+	ch := make(chan string, 10)
+	ticker := time.Tick(time.Second * 10)
+	go func() {
+		for {
+			x := <-ticker
+			log.Printf("Tick!")
+			ch <- x.String()
+		}
+	}()
 
 	// create our scheduler
 	log.Println("Creating scheduler")
-	scheduler := NewScheduler(exec)
+	scheduler := NewScheduler(exec, ch)
+	log.Printf("Created scheduler %+v\n", scheduler)
 
 	// Framework
 	log.Println("Creating framework info")
@@ -44,6 +58,7 @@ func main() {
 		User: proto.String(""), // Mesos-go will fill in user.
 		Name: proto.String("Moroccron " + VERSION),
 	}
+	log.Printf("Created fwinfo %+v\n", fwinfo)
 
 	// Scheduler Driver
 	log.Println("Creating scheduler driver config")
@@ -53,6 +68,7 @@ func main() {
 		Master:     *master,
 		Credential: (*mesos.Credential)(nil),
 	}
+	log.Printf("Created driver config %+v\n", config)
 
 	log.Println("Creating new scheduler driver from config")
 	driver, err := sched.NewMesosSchedulerDriver(config)
@@ -61,6 +77,7 @@ func main() {
 		log.Fatalf("Unable to create a SchedulerDriver: %v\n", err.Error())
 		os.Exit(3)
 	}
+	log.Printf("Created scheduler driver %+v\n", driver)
 
 	log.Println("Starting scheduler driver")
 	if stat, err := driver.Run(); err != nil {
