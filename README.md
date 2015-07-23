@@ -14,3 +14,9 @@ This is horrible and broken and probably wont even compile. Don't use it.
 * Not shitty web UI
 * Resource isolation parameters
 * Pluggable state backend? (docker/libkv? Do we want to use zk for state?)
+
+## Build
+
+```
+$ godep go build
+```

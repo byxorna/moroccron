@@ -1,0 +1,89 @@
+package main
+
+import (
+	"flag"
+	"log"
+	"os"
+
+	"github.com/gogo/protobuf/proto"
+
+	//log "github.com/golang/glog"
+	mesos "github.com/mesos/mesos-go/mesosproto"
+	util "github.com/mesos/mesos-go/mesosutil"
+	sched "github.com/mesos/mesos-go/scheduler"
+
+	. "github.com/byxorna/moroccron/scheduler"
+)
+
+const (
+	VERSION = "0.0.0"
+)
+
+var (
+	master               = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
+	DOCKER_IMAGE_DEFAULT = "debian:latest"
+)
+
+func init() {
+	flag.Parse()
+}
+
+func main() {
+
+	// Executor
+	exec := prepareExecutorInfo()
+
+	// create our scheduler
+	scheduler := NewScheduler(exec)
+
+	// Framework
+	fwinfo := &mesos.FrameworkInfo{
+		User: proto.String(""), // Mesos-go will fill in user.
+		Name: proto.String("Moroccron " + VERSION),
+	}
+
+	// Scheduler Driver
+	config := sched.DriverConfig{
+		Scheduler:  scheduler,
+		Framework:  fwinfo,
+		Master:     *master,
+		Credential: (*mesos.Credential)(nil),
+	}
+
+	driver, err := sched.NewMesosSchedulerDriver(config)
+
+	if err != nil {
+		log.Fatal("Unable to create a SchedulerDriver: %v\n", err.Error())
+		//os.Exit(3)
+	}
+
+	if stat, err := driver.Run(); err != nil {
+		log.Fatalf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
+		os.Exit(4)
+	}
+}
+
+func prepareExecutorInfo() *mesos.ExecutorInfo {
+	// this specifies how the executor will launch the task and identify itsself
+	// i.e. command, args, etc. to the container
+	return &mesos.ExecutorInfo{
+		ExecutorId: util.NewExecutorID("default"),
+		Name:       proto.String("Moroccron Executor"),
+		Source:     proto.String("moroccron"),
+		Container: &mesos.ContainerInfo{
+			Type:     mesos.ContainerInfo_DOCKER.Enum(),
+			Volumes:  nil,
+			Hostname: nil,
+			Docker: &mesos.ContainerInfo_DockerInfo{
+				Image: &DOCKER_IMAGE_DEFAULT,
+			},
+		},
+		Command: &mesos.CommandInfo{
+			Shell: proto.Bool(true),
+			Value: proto.String("/bin/date ; /bin/ls ; /bin/hostname ; cat /etc/debian_version"),
+			//Uris: CommandInfo_URI{}
+			//Value: string binary
+			//Arguments: []string args to value
+		},
+	}
+}
