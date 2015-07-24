@@ -81,6 +81,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 		//TODO i dont understand how you can launch multiple tasks for a single offer. Is the up to the framework to slice resources per task?
 		log.Infoln("Launching ", len(tasks), " tasks for offer", offer.Id.GetValue())
 		driver.LaunchTasks([]*mesos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
+		sched.tasksLaunched++
 	}
 }
 
