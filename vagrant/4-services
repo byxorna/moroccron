@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e -x
+IP_ADDR="${1:-unknown}"
+sudo service mesos-master start
+sudo service mesos-slave start
+echo "Mesos is listening at ${IP_ADDR}:5050"
+echo "moroccron is in ~/code"

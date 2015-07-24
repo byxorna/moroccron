@@ -28,6 +28,18 @@ Start up mesos-playa (`vagrant up` in the playa-mesos directory) and get the IP 
 $ ./moroccron -master $PLAYA_MESOS_HOST_HERE:5050  -logtostderr
 ```
 
+# Devving in vagrant
+
+Vagrant is used to bring up a full dev environment with go, godep, mesos, zookeeper, etc. The code for moroccron is in `~/code`, and can be built with `godep go build`.
+
+```
+$ vagrant up
+$ vagrant ssh
+$ cd code && godep go build && ./morrocron -logtostderr
+```
+
+You can access the mesos master at http://10.10.0.5:5050 in your host browser.
+
 
 #TODO
 * represent jobs in a model

@@ -1,0 +1,13 @@
+#!/bin/bash
+set -e -x
+
+mkdir -p /home/vagrant/go/src/github.com/byxorna/moroccron
+ln -sn $_ code
+sudo chown -R vagrant:vagrant /home/vagrant/go
+cat >>.profile <<"_EOF_"
+export GOPATH=/home/vagrant/go
+export PATH=$PATH:$HOME/bin:$GOPATH/bin
+_EOF_
+
+sudo apt-get update
+sudo apt-get install -y git mercurial vim
