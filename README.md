@@ -42,6 +42,9 @@ You can access the mesos master at http://10.10.0.5:5050 in your host browser.
 
 
 #TODO
+
+Figure out how to get task to launch with docker executor. Currently its running an executor and complaining about `panic: exec: "docker": executable file not found in $PATH` before ever launching its task. Why, I don't know...
+
 * represent jobs in a model
   * constraints, image, args/command, resources
 * Make http api

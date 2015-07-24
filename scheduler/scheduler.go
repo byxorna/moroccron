@@ -43,8 +43,6 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 
 	for _, offer := range offers {
 
-		//if we dont have any work to do, just driver.DeclineOffer(offerId *mesos.OfferID, filters *mesos.Filters)
-		// see if we have any jobs waiting to run. for now, just use a channel full of jobs
 		var (
 			data string
 			ok   bool
@@ -58,7 +56,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 				log.Infoln("Channel closed! FUCK why did this happen")
 			}
 		default:
-			log.Infof("No pending work; declining offer %s: %+v", offer.Id, offer)
+			log.Infof("No pending work; declining offer %s", offer.Id)
 			driver.DeclineOffer(offer.Id, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
 			continue
 		}
@@ -88,7 +86,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 				//Value: string binary
 				//Arguments: []string args to value
 			},
-			//Executor: getExecutor(data),
+			Executor: nil,
 			Resources: []*mesos.Resource{
 				//TODO this is bad. We shouldnt just blindly use up all the offered resources, but... whatever
 				util.NewScalarResource("cpus", getOfferCpu(offer)),
