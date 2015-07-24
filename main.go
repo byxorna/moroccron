@@ -56,7 +56,7 @@ func main() {
 	log.Println("Creating framework info")
 	fwinfo := &mesos.FrameworkInfo{
 		User: proto.String(""), // Mesos-go will fill in user.
-		Name: proto.String("Moroccron " + VERSION),
+		Name: proto.String("moroccron-" + VERSION),
 	}
 	log.Printf("Created fwinfo %+v\n", fwinfo)
 

@@ -19,10 +19,8 @@ type Scheduler struct {
 
 func NewScheduler(exec *mesos.ExecutorInfo, ch chan string) *Scheduler {
 	return &Scheduler{
-		executor:      exec,
-		tasksLaunched: 0,
-		tasksFinished: 0,
-		JobsCh:        ch,
+		executor: exec,
+		JobsCh:   ch,
 	}
 }
 
@@ -41,48 +39,46 @@ func (sched *Scheduler) Disconnected(sched.SchedulerDriver) {
 func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
 	logOffers(offers)
 
-	// see if we have any jobs waiting to run. for now, just use a channel full of jobs
-	select {
-	case x, ok := <-sched.JobsCh:
-		if ok {
-			log.Infoln("Value %d was read.\n", x)
-		} else {
-			log.Infoln("Channel closed!")
-		}
-	default:
-		log.Infoln("Nothing in channel to launch")
-		return
-	}
-
 	for _, offer := range offers {
 
-		var tasks []*mesos.TaskInfo
-		for sched.tasksLaunched < sched.totalTasks {
-
-			log.Infoln("Processing image %v of %v\n", sched.tasksLaunched, sched.totalTasks)
-			sched.tasksLaunched++
-
-			taskId := &mesos.TaskID{
-				Value: proto.String(strconv.Itoa(sched.tasksLaunched)),
+		//if we dont have any work to do, just driver.DeclineOffer(offerId *mesos.OfferID, filters *mesos.Filters)
+		// see if we have any jobs waiting to run. for now, just use a channel full of jobs
+		var data string
+		select {
+		case data, ok := <-sched.JobsCh:
+			if ok {
+				log.Infof("Got work %s\n", data)
+			} else {
+				//TODO should we abort?
+				log.Infoln("Channel closed! FUCK why did this happen")
 			}
-
-			task := &mesos.TaskInfo{
-				Name:      proto.String("moroccron-task-" + taskId.GetValue()),
-				TaskId:    taskId,
-				SlaveId:   offer.SlaveId,
-				Executor:  sched.executor,
-				Resources: []*mesos.Resource{
-				//TODO stuff in constraints
-				//util.NewScalarResource("cpus", sched.cpuPerTask),
-				//util.NewScalarResource("mem", sched.memPerTask),
-				},
-				Data: []byte("this is a data string as raw bytes"),
-			}
-			log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())
-
-			tasks = append(tasks, task)
+		default:
+			log.Infof("No pending work; declining offer %s: %+v", offer.Id, offer)
+			driver.DeclineOffer(offer.Id, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
+			continue
 		}
-		log.Infoln("Launching ", len(tasks), "tasks for offer", offer.Id.GetValue())
+
+		taskId := &mesos.TaskID{
+			Value: proto.String(strconv.Itoa(sched.tasksLaunched)),
+		}
+
+		task := &mesos.TaskInfo{
+			Name:      proto.String("moroccron-task-" + taskId.GetValue()),
+			TaskId:    taskId,
+			SlaveId:   offer.SlaveId,
+			Executor:  sched.executor,
+			Resources: []*mesos.Resource{
+			//TODO stuff in constraints
+			//util.NewScalarResource("cpus", sched.cpuPerTask),
+			//util.NewScalarResource("mem", sched.memPerTask),
+			},
+			Data: []byte(data),
+		}
+		log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())
+
+		var tasks []*mesos.TaskInfo = []*mesos.TaskInfo{task}
+		//TODO i dont understand how you can launch multiple tasks for a single offer
+		log.Infoln("Launching ", len(tasks), " tasks for offer", offer.Id.GetValue())
 		driver.LaunchTasks([]*mesos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
 	}
 }
