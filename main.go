@@ -103,7 +103,7 @@ func prepareExecutorInfo() *mesos.ExecutorInfo {
 		},
 		Command: &mesos.CommandInfo{
 			Shell: proto.Bool(true),
-			Value: proto.String("/bin/date ; /bin/ls ; /bin/hostname ; cat /etc/debian_version"),
+			Value: proto.String("set -x ; /bin/date ; /bin/hostname ; cat /etc/debian_version ; sleep 20 ; echo done"),
 			//Uris: CommandInfo_URI{}
 			//Value: string binary
 			//Arguments: []string args to value
