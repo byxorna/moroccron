@@ -29,10 +29,13 @@ $ ./moroccron -master $PLAYA_MESOS_HOST_HERE:5050  -logtostderr
 ```
 
 
-# Architecture
-
-##Scheduler
-
-##Executor
-
-What runs on each slave. This is actually distributed by the framework as a standalone binary. This consumes resources, and will be delegated work (or finds work?).
+#TODO
+* represent jobs in a model
+  * constraints, image, args/command, resources
+* Make http api
+  * create job
+  * query job/deps
+  * delete job
+* Make ticker figure out if there are jobs to do
+  * ticker could make resource requests when there is work to be done instead of waiting for an offer
+* make scheduler smarter about scheduling more than 1 task per offer (keep track of resource limitations per job)

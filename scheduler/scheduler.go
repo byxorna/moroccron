@@ -10,19 +10,19 @@ import (
 	sched "github.com/mesos/mesos-go/scheduler"
 )
 
+var (
+	DOCKER_IMAGE_DEFAULT = "debian:latest"
+)
+
 type Scheduler struct {
-	executor      *mesos.ExecutorInfo
 	tasksLaunched int
 	tasksFinished int
 	totalTasks    int
 	JobsCh        chan string
 }
 
-func NewScheduler(exec *mesos.ExecutorInfo, ch chan string) *Scheduler {
-	return &Scheduler{
-		executor: exec,
-		JobsCh:   ch,
-	}
+func NewScheduler(ch chan string) *Scheduler {
+	return &Scheduler{JobsCh: ch}
 }
 
 func (sched *Scheduler) Registered(driver sched.SchedulerDriver, frameworkId *mesos.FrameworkID, masterInfo *mesos.MasterInfo) {
@@ -67,7 +67,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 			Name:     proto.String("moroccron-task-" + taskId.GetValue()),
 			TaskId:   taskId,
 			SlaveId:  offer.SlaveId,
-			Executor: sched.executor,
+			Executor: getExecutor(data),
 			Resources: []*mesos.Resource{
 				//TODO this is bad. We shouldnt just blindly use up all the offered resources, but... whatever
 				util.NewScalarResource("cpus", getOfferCpu(offer)),
@@ -133,4 +133,27 @@ func (sched *Scheduler) ExecutorLost(s sched.SchedulerDriver, exId *mesos.Execut
 
 func (sched *Scheduler) Error(driver sched.SchedulerDriver, err string) {
 	log.Infoln("Scheduler received error:", err)
+}
+
+func getExecutor(data string) *mesos.ExecutorInfo {
+	return &mesos.ExecutorInfo{
+		ExecutorId: util.NewExecutorID("default"),
+		Name:       proto.String("Moroccron Executor"),
+		Source:     proto.String("moroccron"),
+		Container: &mesos.ContainerInfo{
+			Type:     mesos.ContainerInfo_DOCKER.Enum(),
+			Volumes:  nil,
+			Hostname: nil,
+			Docker: &mesos.ContainerInfo_DockerInfo{
+				Image: &DOCKER_IMAGE_DEFAULT,
+			},
+		},
+		Command: &mesos.CommandInfo{
+			Shell: proto.Bool(true),
+			Value: proto.String("set -x ; /bin/date ; /bin/hostname ; cat /etc/debian_version ; sleep 20 ; echo " + data),
+			//Uris: CommandInfo_URI{}
+			//Value: string binary
+			//Arguments: []string args to value
+		},
+	}
 }

@@ -10,7 +10,6 @@ import (
 
 	//log "github.com/golang/glog"
 	mesos "github.com/mesos/mesos-go/mesosproto"
-	util "github.com/mesos/mesos-go/mesosutil"
 	sched "github.com/mesos/mesos-go/scheduler"
 
 	. "github.com/byxorna/moroccron/scheduler"
@@ -21,8 +20,7 @@ const (
 )
 
 var (
-	master               = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
-	DOCKER_IMAGE_DEFAULT = "debian:latest"
+	master = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
 )
 
 func init() {
@@ -30,11 +28,6 @@ func init() {
 }
 
 func main() {
-
-	// Executor
-	log.Println("Creating executor information")
-	exec := prepareExecutorInfo()
-	log.Printf("Created executor info %+v\n", exec)
 
 	// create a channel where we send jobs
 	ch := make(chan string, 10)
@@ -49,7 +42,7 @@ func main() {
 
 	// create our scheduler
 	log.Println("Creating scheduler")
-	scheduler := NewScheduler(exec, ch)
+	scheduler := NewScheduler(ch)
 	log.Printf("Created scheduler %+v\n", scheduler)
 
 	// Framework
@@ -83,30 +76,5 @@ func main() {
 	if stat, err := driver.Run(); err != nil {
 		log.Fatalf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
 		os.Exit(4)
-	}
-}
-
-func prepareExecutorInfo() *mesos.ExecutorInfo {
-	// this specifies how the executor will launch the task and identify itsself
-	// i.e. command, args, etc. to the container
-	return &mesos.ExecutorInfo{
-		ExecutorId: util.NewExecutorID("default"),
-		Name:       proto.String("Moroccron Executor"),
-		Source:     proto.String("moroccron"),
-		Container: &mesos.ContainerInfo{
-			Type:     mesos.ContainerInfo_DOCKER.Enum(),
-			Volumes:  nil,
-			Hostname: nil,
-			Docker: &mesos.ContainerInfo_DockerInfo{
-				Image: &DOCKER_IMAGE_DEFAULT,
-			},
-		},
-		Command: &mesos.CommandInfo{
-			Shell: proto.Bool(true),
-			Value: proto.String("set -x ; /bin/date ; /bin/hostname ; cat /etc/debian_version ; sleep 20 ; echo done"),
-			//Uris: CommandInfo_URI{}
-			//Value: string binary
-			//Arguments: []string args to value
-		},
 	}
 }
