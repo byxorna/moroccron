@@ -44,9 +44,12 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 
 		//if we dont have any work to do, just driver.DeclineOffer(offerId *mesos.OfferID, filters *mesos.Filters)
 		// see if we have any jobs waiting to run. for now, just use a channel full of jobs
-		var data string
+		var (
+			data string
+			ok   bool
+		)
 		select {
-		case data, ok := <-sched.JobsCh:
+		case data, ok = <-sched.JobsCh:
 			if ok {
 				log.Infof("Got work %s\n", data)
 			} else {
