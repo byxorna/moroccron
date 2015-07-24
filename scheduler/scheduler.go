@@ -1,8 +1,9 @@
 package scheduler
 
 import (
+	"fmt"
 	"github.com/gogo/protobuf/proto"
-	"strconv"
+	"time"
 
 	log "github.com/golang/glog"
 	mesos "github.com/mesos/mesos-go/mesosproto"
@@ -63,14 +64,31 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 		}
 
 		taskId := &mesos.TaskID{
-			Value: proto.String(strconv.Itoa(sched.tasksLaunched)),
+			Value: proto.String(fmt.Sprintf("moroccron-task-%d", time.Now().Unix())),
 		}
 
 		task := &mesos.TaskInfo{
-			Name:     proto.String("moroccron-task-" + taskId.GetValue()),
-			TaskId:   taskId,
-			SlaveId:  offer.SlaveId,
-			Executor: getExecutor(data),
+			//TODO make this the timestamp of invocation, so its unique (with the id of the job name)
+			Name:    proto.String(taskId.GetValue()),
+			TaskId:  taskId,
+			SlaveId: offer.SlaveId,
+			Container: &mesos.ContainerInfo{
+				Type:     mesos.ContainerInfo_DOCKER.Enum(),
+				Volumes:  nil,
+				Hostname: nil,
+				Docker: &mesos.ContainerInfo_DockerInfo{
+					Image:   &DOCKER_IMAGE_DEFAULT,
+					Network: mesos.ContainerInfo_DockerInfo_BRIDGE.Enum(),
+				},
+			},
+			Command: &mesos.CommandInfo{
+				Shell: proto.Bool(true),
+				Value: proto.String("set -x ; /bin/date ; /bin/hostname ; cat /etc/debian_version ; sleep 20 ; echo " + data),
+				//Uris: CommandInfo_URI{}
+				//Value: string binary
+				//Arguments: []string args to value
+			},
+			//Executor: getExecutor(data),
 			Resources: []*mesos.Resource{
 				//TODO this is bad. We shouldnt just blindly use up all the offered resources, but... whatever
 				util.NewScalarResource("cpus", getOfferCpu(offer)),
@@ -78,6 +96,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 			},
 			Data: []byte(data),
 		}
+
 		log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())
 
 		var tasks []*mesos.TaskInfo = []*mesos.TaskInfo{task}
