@@ -6,6 +6,7 @@ import (
 
 	log "github.com/golang/glog"
 	mesos "github.com/mesos/mesos-go/mesosproto"
+	util "github.com/mesos/mesos-go/mesosutil"
 	sched "github.com/mesos/mesos-go/scheduler"
 )
 
@@ -63,21 +64,21 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 		}
 
 		task := &mesos.TaskInfo{
-			Name:      proto.String("moroccron-task-" + taskId.GetValue()),
-			TaskId:    taskId,
-			SlaveId:   offer.SlaveId,
-			Executor:  sched.executor,
+			Name:     proto.String("moroccron-task-" + taskId.GetValue()),
+			TaskId:   taskId,
+			SlaveId:  offer.SlaveId,
+			Executor: sched.executor,
 			Resources: []*mesos.Resource{
-			//TODO stuff in constraints
-			//util.NewScalarResource("cpus", sched.cpuPerTask),
-			//util.NewScalarResource("mem", sched.memPerTask),
+				//TODO this is bad. We shouldnt just blindly use up all the offered resources, but... whatever
+				util.NewScalarResource("cpus", getOfferCpu(offer)),
+				util.NewScalarResource("mem", getOfferMem(offer)),
 			},
 			Data: []byte(data),
 		}
 		log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())
 
 		var tasks []*mesos.TaskInfo = []*mesos.TaskInfo{task}
-		//TODO i dont understand how you can launch multiple tasks for a single offer
+		//TODO i dont understand how you can launch multiple tasks for a single offer. Is the up to the framework to slice resources per task?
 		log.Infoln("Launching ", len(tasks), " tasks for offer", offer.Id.GetValue())
 		driver.LaunchTasks([]*mesos.OfferID{offer.Id}, tasks, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
 	}
