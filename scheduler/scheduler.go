@@ -91,21 +91,26 @@ func (sched *Scheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos
 		log.Infoln("%v of %v tasks finished.", sched.tasksFinished, sched.totalTasks)
 	}
 
-	if sched.tasksFinished >= sched.totalTasks {
-		log.Infoln("Total tasks completed, stopping framework.")
-		driver.Stop(false)
-	}
+	/*
+		  //never shut down framework!
+			if sched.tasksFinished >= sched.totalTasks {
+				log.Infoln("Total tasks completed, stopping framework.")
+				driver.Stop(false)
+			}
+	*/
 
-	if status.GetState() == mesos.TaskState_TASK_LOST ||
-		status.GetState() == mesos.TaskState_TASK_KILLED ||
-		status.GetState() == mesos.TaskState_TASK_FAILED {
-		log.Infoln(
-			"Aborting because task", status.TaskId.GetValue(),
-			"is in unexpected state", status.State.String(),
-			"with message", status.GetMessage(),
-		)
-		driver.Abort()
-	}
+	/*
+		if status.GetState() == mesos.TaskState_TASK_LOST ||
+			status.GetState() == mesos.TaskState_TASK_KILLED ||
+			status.GetState() == mesos.TaskState_TASK_FAILED {
+			log.Infoln(
+				"Aborting because task", status.TaskId.GetValue(),
+				"is in unexpected state", status.State.String(),
+				"with message", status.GetMessage(),
+			)
+			driver.Abort()
+		}
+	*/
 }
 
 func (sched *Scheduler) OfferRescinded(s sched.SchedulerDriver, id *mesos.OfferID) {
