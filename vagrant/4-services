@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e -x
 IP_ADDR="${1:-unknown}"
+# this is necessary because for some reason in ubuntu, the executors dont inherit the correct PATH from the slave
+# so we need to explicitly set PATH so it can find the docker binary
+echo '{"PATH":"/bin:/usr/bin:/usr/local/bin:/usr/local/sbin"}'|sudo tee /etc/mesos-slave/executor_environment_variables
 sudo service mesos-master start
 sudo service mesos-slave start
 echo "Mesos is listening at ${IP_ADDR}:5050"
