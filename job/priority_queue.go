@@ -1,5 +1,9 @@
 package job
 
+import (
+	"container/heap"
+)
+
 // A JobQueue implements heap.Interface and holds Jobs.
 type JobQueue []*Job
 
@@ -32,10 +36,9 @@ func (pq *JobQueue) Pop() interface{} {
 	return item
 }
 
-// update modifies the priority and value of a Job in the queue.
-/*
-func (pq *JobQueue) update(item *Job, priority int) {
-	item.priority = priority
-	heap.Fix(pq, item.index)
+// update recomputes the priority of a Job in the queue and fixes the PQ up.
+func (pq *JobQueue) Update(j *Job) {
+	j.ComputePriority()
+	//item.priority = priority
+	heap.Fix(pq, j.index)
 }
-*/

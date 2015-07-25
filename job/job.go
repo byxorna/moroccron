@@ -41,6 +41,7 @@ func (j *Job) String() string {
 
 // recompute job priority based on last run, time, etc
 func (j *Job) ComputePriority() int {
+	//TODO set j.priority = some value
 	//TODO FIXME how do you use const types to do math? j.scheduling_priority*10
 	return j.priority
 }

@@ -46,3 +46,38 @@ func TestPriorityQueueInit(t *testing.T) {
 	}
 
 }
+
+func TestPriorityQueueUpdate(t *testing.T) {
+	items := map[string]int{
+		"c": 5, "d": 3, "e": 0, "b": 15,
+	}
+
+	pq := make(JobQueue, len(items))
+	i := 0
+	for id, pri := range items {
+		pq[i] = &Job{
+			Id:       id,
+			priority: pri,
+			index:    i,
+		}
+		i++
+	}
+
+	heap.Init(&pq)
+
+	j := &Job{
+		Id:       "z",
+		priority: -19,
+	}
+	heap.Push(&pq, j)
+
+	j.priority = 1000
+	pq.Update(j)
+
+	top := heap.Pop(&pq).(*Job)
+	t.Logf("Found job:%s pri:%d", top.Id, top.priority)
+	if top.Id != "z" {
+		t.Errorf("z was not the top job of the queue; found %s instead", top.Id)
+	}
+
+}
