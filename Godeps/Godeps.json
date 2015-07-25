@@ -44,6 +44,11 @@
 			"Rev": "83b52d7f648d2a2fa91330123d348d4090be2aed"
 		},
 		{
+			"ImportPath": "github.com/robfig/cron",
+			"Comment": "v1-2-g67823cd",
+			"Rev": "67823cd24dece1b04cced3a0a0b3ca2bc84d875e"
+		},
+		{
 			"ImportPath": "github.com/samuel/go-zookeeper/zk",
 			"Rev": "fa6674abf3f4580b946a01bf7a1ce4ba8766205b"
 		},

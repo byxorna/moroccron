@@ -2,15 +2,23 @@ package job
 
 import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
+	"github.com/robfig/cron"
+	"time"
 )
 
-type JobPriority int32
+type JobPriority string
 
 const (
-	LowPriority    JobPriority = -1
-	NormalPriority JobPriority = 0
-	HighPriority   JobPriority = 1
+	LowPriority    JobPriority = "LOW"
+	NormalPriority JobPriority = "NORMAL"
+	HighPriority   JobPriority = "HIGH"
 )
+
+var JobPriorityValue = map[JobPriority]float64{
+	"LOW":    0.5,
+	"NORMAL": 1.0,
+	"HIGH":   2.0,
+}
 
 type Job struct {
 	Id string `json:"id"`
@@ -25,14 +33,21 @@ type Job struct {
 	Arguments   []string          `json:"arguments,omitempty"`
 	Environment map[string]string `json:"environment,omitempty"`
 
-	// for scheduling. TODO: support cron syntax parsing, and ISO8601 recurring intervals?
-	//NextRun time.Time     `json:"next_run"`
-	//Every   time.Duration `json:"every"`
+	// for scheduling. TODO: support ISO8601 recurring intervals?
+	t_schedule   cron.Schedule `json:"-"`
+	t_cron_entry string        `json:"cron_schedule"`
+	t_last_run   *time.Time    //`json:"next_run"`
 
 	scheduling_priority JobPriority `json:"priority"`
 	// priority ranking for the job queue
-	priority int `json:"-"`
-	index    int `json:"-"`
+	priority float64 `json:"-"`
+	index    int     `json:"-"`
+}
+
+func New(image string, command string, arguments []string, shell bool, env map[string]string, cronspec string) (*Job, error) {
+	//TODO FIXME
+	j := Job{}
+	return &j, nil
 }
 
 func (j *Job) String() string {
@@ -40,8 +55,23 @@ func (j *Job) String() string {
 }
 
 // recompute job priority based on last run, time, etc
-func (j *Job) ComputePriority() int {
-	//TODO set j.priority = some value
-	//TODO FIXME how do you use const types to do math? j.scheduling_priority*10
+func (j *Job) ComputePriority() float64 {
+	tnow := time.Now()
+	next := j.NextScheduledRun()
+	diff := tnow.Sub(next)
+	if diff.Seconds() < 0 {
+		// we havent surpassed our next scheduled run, so just give a low priority
+		j.priority = diff.Seconds()
+		return j.priority
+	}
+	j.priority = diff.Seconds() * JobPriorityValue[j.scheduling_priority]
 	return j.priority
+}
+
+func (j *Job) NextScheduledRun() time.Time {
+	if j.t_last_run == nil {
+		// job not run yet, so lets compute when it will run next
+		return j.t_schedule.Next(time.Now())
+	}
+	return j.t_schedule.Next(*j.t_last_run)
 }

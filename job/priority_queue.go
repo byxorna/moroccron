@@ -36,6 +36,12 @@ func (pq *JobQueue) Pop() interface{} {
 	return item
 }
 
+func (pq *JobQueue) Peek() interface{} {
+	n := len(*pq)
+	item := (*pq)[n-1]
+	return item
+}
+
 // update recomputes the priority of a Job in the queue and fixes the PQ up.
 func (pq *JobQueue) Update(j *Job) {
 	j.ComputePriority()
