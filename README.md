@@ -17,17 +17,6 @@ This is just a playground to see how easy it is to make a mesos framework.
 * Resource isolation parameters
 * Pluggable state backend? (docker/libkv? Do we want to use zk for state?)
 
-## Build
-
-```
-$ godep go build
-```
-## Run
-Start up mesos-playa (`vagrant up` in the playa-mesos directory) and get the IP for the mesos host: `vagrant hosts list`.
-```
-$ ./moroccron -master $PLAYA_MESOS_HOST_HERE:5050  -logtostderr
-```
-
 # Devving in vagrant
 
 Vagrant is used to bring up a full dev environment with go, godep, mesos, zookeeper, etc. The code for moroccron is in `~/code`, and can be built with `godep go build`.
