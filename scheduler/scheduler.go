@@ -1,7 +1,6 @@
 package scheduler
 
 import (
-	"encoding/json"
 	"fmt"
 	. "github.com/byxorna/moroccron/job"
 	"github.com/gogo/protobuf/proto"
@@ -46,38 +45,30 @@ func (sched *Scheduler) Disconnected(sched.SchedulerDriver) {
 	log.Infoln("Scheduler Disconnected")
 }
 
+func getPendingJobs() (*[]Job, error) {
+	//TODO FIXME this should query for all jobs ready to run
+	return &[]Job{}, nil
+}
+
 func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*mesos.Offer) {
 	logOffers(offers)
+	jobs, err := getPendingJobs()
+	if err != nil {
+		log.Errorf("Unable to get pending jobs! %s\n", err.Error())
+		return
+	}
 
 	for _, offer := range offers {
 
-		var (
-			job Job
-			ok  bool
-		)
-		select {
-		case job, ok = <-sched.JobsCh:
-			if ok {
-				log.Infof("Got job %s\n", job.Id)
-			} else {
-				//TODO should we abort?
-				log.Infoln("Channel closed! FUCK why did this happen")
-			}
-		default:
+		if len(*jobs) == 0 {
 			log.Infof("No pending work; declining offer %s", offer.Id)
 			driver.DeclineOffer(offer.Id, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
 			continue
 		}
 
+		//TODO figure out which of the jobs will fit inside this offer (call packJobs(offer, jobs))
 		taskId := &mesos.TaskID{
 			Value: proto.String(fmt.Sprintf("moroccron-task-%d", time.Now().Unix())),
-		}
-
-		job_json, err := json.Marshal(job)
-		if err != nil {
-			log.Errorf("Unable to serialize job %s: %s\n", job.Id, err.Error())
-			driver.DeclineOffer(offer.Id, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
-			continue
 		}
 
 		task := &mesos.TaskInfo{
@@ -96,7 +87,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 			},
 			Command: &mesos.CommandInfo{
 				Shell: proto.Bool(true),
-				Value: proto.String("set -x ; /bin/date ; /bin/hostname ; cat /etc/debian_version ; sleep 20 ; echo " + job.String()),
+				Value: proto.String("set -x ; /bin/date ; /bin/hostname ; cat /etc/debian_version ; sleep 20 ; echo done"),
 				//Uris: CommandInfo_URI{}
 				//Value: string binary
 				//Arguments: []string args to value
@@ -107,7 +98,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 				util.NewScalarResource("cpus", getOfferCpu(offer)),
 				util.NewScalarResource("mem", getOfferMem(offer)),
 			},
-			Data: job_json,
+			//Data: job_json,
 		}
 
 		log.Infof("Prepared task: %s with offer %s for launch\n", task.GetName(), offer.Id.GetValue())

@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"os"
-	"time"
 
 	"github.com/gogo/protobuf/proto"
 
@@ -29,20 +28,13 @@ func init() {
 
 func main() {
 
-	// create a channel where we send jobs
-	ch := make(chan string, 10)
-	ticker := time.Tick(time.Second * 10)
-	go func() {
-		for {
-			x := <-ticker
-			log.Printf("Tick!")
-			ch <- x.String()
-		}
-	}()
-
 	// create our scheduler
 	log.Println("Creating scheduler")
-	scheduler := NewScheduler(ch)
+	scheduler, err := NewScheduler()
+	if err != nil {
+		log.Fatalf("Unable to create scheduler: %s\n", err.Error())
+		os.Exit(1)
+	}
 	log.Printf("Created scheduler %+v\n", scheduler)
 
 	// Framework

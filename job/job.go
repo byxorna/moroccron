@@ -2,7 +2,6 @@ package job
 
 import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
-	"time"
 )
 
 type Job struct {
@@ -15,12 +14,12 @@ type Job struct {
 	// if shell == false, command is the binary, arguments are args
 	Command *string `json:"command,omitempty"`
 	// arguments are only read if shell == false
-	Arguments   []string           `json:"arguments,omitempty"`
-	Environment *mesos.Environment `json:"environment,omitempty"`
+	Arguments   []string          `json:"arguments,omitempty"`
+	Environment map[string]string `json:"environment,omitempty"`
 
 	// for scheduling. TODO: support cron syntax parsing, and ISO8601 recurring intervals?
-	NextRun time.Time     `json:"next_run"`
-	Every   time.Duration `json:"every"`
+	//NextRun time.Time     `json:"next_run"`
+	//Every   time.Duration `json:"every"`
 
 	// for the job queue
 	priority int
@@ -29,4 +28,9 @@ type Job struct {
 
 func (j *Job) String() string {
 	return j.Id
+}
+
+// recompute job priority based on last run, time, etc
+func (j *Job) ComputePriority() {
+	//TODO
 }
