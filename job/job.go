@@ -4,6 +4,14 @@ import (
 	mesos "github.com/mesos/mesos-go/mesosproto"
 )
 
+type JobPriority int32
+
+const (
+	LowPriority    JobPriority = -1
+	NormalPriority JobPriority = 0
+	HighPriority   JobPriority = 1
+)
+
 type Job struct {
 	Id string `json:"id"`
 
@@ -21,9 +29,10 @@ type Job struct {
 	//NextRun time.Time     `json:"next_run"`
 	//Every   time.Duration `json:"every"`
 
-	// for the job queue
-	priority int
-	index    int
+	scheduling_priority JobPriority `json:"priority"`
+	// priority ranking for the job queue
+	priority int `json:"-"`
+	index    int `json:"-"`
 }
 
 func (j *Job) String() string {
@@ -31,6 +40,7 @@ func (j *Job) String() string {
 }
 
 // recompute job priority based on last run, time, etc
-func (j *Job) ComputePriority() {
-	//TODO
+func (j *Job) ComputePriority() int {
+	//TODO FIXME how do you use const types to do math? j.scheduling_priority*10
+	return j.priority
 }

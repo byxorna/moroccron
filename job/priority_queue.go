@@ -1,9 +1,5 @@
 package job
 
-import (
-	"container/heap"
-)
-
 // A JobQueue implements heap.Interface and holds Jobs.
 type JobQueue []*Job
 
@@ -11,7 +7,7 @@ func (pq JobQueue) Len() int { return len(pq) }
 
 func (pq JobQueue) Less(i, j int) bool {
 	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	return pq[i].priority > pq[j].priority
+	return pq[i].ComputePriority() > pq[j].ComputePriority()
 }
 
 func (pq JobQueue) Swap(i, j int) {
@@ -37,7 +33,9 @@ func (pq *JobQueue) Pop() interface{} {
 }
 
 // update modifies the priority and value of a Job in the queue.
+/*
 func (pq *JobQueue) update(item *Job, priority int) {
 	item.priority = priority
 	heap.Fix(pq, item.index)
 }
+*/
