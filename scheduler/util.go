@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	. "github.com/byxorna/moroccron/job"
 	log "github.com/golang/glog"
 	mesos "github.com/mesos/mesos-go/mesosproto"
 	util "github.com/mesos/mesos-go/mesosutil"
@@ -32,4 +33,11 @@ func logOffers(offers []*mesos.Offer) {
 	for _, offer := range offers {
 		log.Infof("Received Offer <%v> with cpus=%v mem=%v", offer.Id.GetValue(), getOfferCpu(offer), getOfferMem(offer))
 	}
+}
+
+func loadJobs() (*JobQueue, error) {
+	//TODO hook me up with some data store
+	//or at least read in from some flat files
+	//jobs := []Job{}
+	return &JobQueue{}, nil
 }

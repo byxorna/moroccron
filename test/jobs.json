@@ -1,0 +1,8 @@
+[
+  {
+    "id":"job1",
+    "image":"debian",
+    "shell":true,
+    "command":"set -x ; /bin/date ; /bin/hostname ; cat /etc/debian_version ; sleep 20 ; echo 'all done'"
+  }
+]
