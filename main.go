@@ -69,16 +69,23 @@ func main() {
 	log.Printf("Created scheduler driver %+v\n", driver)
 
 	log.Println("Starting scheduler driver")
-	if stat, err := driver.Run(); err != nil {
-		log.Fatalf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
-		os.Exit(4)
-	}
+	go func() {
+		if stat, err := driver.Run(); err != nil {
+			log.Fatalf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
+			os.Exit(2)
+		}
+	}()
 
-	log.Printf("Bringing up web interface at :%d\n", webPort)
+	log.Printf("Bringing up web interface at :%d\n", *webPort)
 	router := web.New()
-	err = http.ListenAndServe(fmt.Sprintf(":%d", webPort), router)
-	if err != nil {
-		log.Fatalf("Error launching web interface: %s\n", err.Error())
-		os.Exit(2)
-	}
+	go func() {
+		err := http.ListenAndServe(fmt.Sprintf(":%d", *webPort), router)
+		if err != nil {
+			log.Fatalf("Error launching web interface: %s\n", err.Error())
+			os.Exit(2)
+		}
+	}()
+
+	// chill out, squire! our web interface and scheduler are running in goroutines
+	select {}
 }
