@@ -18,6 +18,7 @@ type Scheduler struct {
 	tasksFinished int
 	totalTasks    int
 	Jobs          *JobQueue
+	RunningJobs   map[string]*Job
 }
 
 func NewScheduler() (*Scheduler, error) {
@@ -77,6 +78,9 @@ func (sched *Scheduler) StatusUpdate(driver sched.SchedulerDriver, status *mesos
 		sched.tasksFinished++
 		log.Infoln("%v of %v tasks finished.", sched.tasksFinished, sched.totalTasks)
 	}
+
+	//TODO if a job is finished, failed, error, lost, killed
+	// figure out how this impacts dependent jobs and update job graph
 
 	/*
 		  //never shut down framework!

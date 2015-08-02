@@ -36,6 +36,10 @@ You can access the mesos master at http://10.10.0.5:5050 in your host browser.
 
 * create job packing function that packs jobs into offers
   * make scheduler smarter about scheduling more than 1 task per offer (keep track of resource limitations per job)
+* Track running jobs in scheduler
+  * add jobs when launching
+  * update/remove jobs when statusUpdate
+
 * Make http api
   * create job
   * query job/deps
