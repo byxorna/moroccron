@@ -26,6 +26,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.network "private_network", ip: IP_ADDR
   config.vm.network "forwarded_port", guest: 5050, host: 5050
+  config.vm.network "forwarded_port", guest: 8000, host: 8000
 
   #config.vm.provision "file", source: "vagrant/profile", destination: "/home/vagrant/.profile"
   # be nice, so people can hack inside vbox
