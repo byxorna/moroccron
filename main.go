@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gogo/protobuf/proto"
@@ -12,6 +14,7 @@ import (
 	sched "github.com/mesos/mesos-go/scheduler"
 
 	. "github.com/byxorna/moroccron/scheduler"
+	"github.com/byxorna/moroccron/web"
 )
 
 const (
@@ -19,7 +22,8 @@ const (
 )
 
 var (
-	master = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
+	master  = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
+	webPort = flag.Int("web-port", 8000, "Port to serve http on (default: 8000)")
 )
 
 func init() {
@@ -68,5 +72,13 @@ func main() {
 	if stat, err := driver.Run(); err != nil {
 		log.Fatalf("Framework stopped with status %s and error: %s\n", stat.String(), err.Error())
 		os.Exit(4)
+	}
+
+	log.Printf("Bringing up web interface at :%d\n", webPort)
+	router := web.New(*webPort)
+	err = http.ListenAndServe(fmt.Sprintf(":%d", webPort), router)
+	if err != nil {
+		log.Fatalf("Error launching web interface: %s\n", err.Error())
+		os.Exit(2)
 	}
 }
