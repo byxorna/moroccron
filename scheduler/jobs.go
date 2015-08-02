@@ -25,7 +25,13 @@ func getLaunchableJobs() ([]Job, error) {
 // returning a list of packed jobs with their offers
 func packJobsInOffers(jobs []Job, offers []*mesos.Offer) ([]OfferTasksPair, error) {
 	//TODO
-	return []OfferTasksPair{}, nil
+	offerTasks := make([]OfferTasksPair, len(offers))
+	i := 0
+	for _, offer := range offers {
+		offerTasks[i].Offer = offer
+		i++
+	}
+	return offerTasks, nil
 }
 
 func createTask(job *Job, offer *mesos.Offer) mesos.TaskInfo {

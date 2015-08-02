@@ -7,7 +7,7 @@ import (
 )
 
 type OfferTasksPair struct {
-	Offer mesos.Offer
+	Offer *mesos.Offer
 	Tasks []*mesos.TaskInfo
 }
 

@@ -41,6 +41,7 @@ You can access the mesos master at http://10.10.0.5:5050 in your host browser.
   * update/remove jobs when statusUpdate
 
 * Make http api
+  * create middleware to ensure responses are written back as json with proper headers
   * create job
   * query job/deps
   * delete job

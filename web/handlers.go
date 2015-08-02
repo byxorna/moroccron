@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -10,7 +11,20 @@ func Index(w http.ResponseWriter, r *http.Request) {
 }
 
 func ApiV1Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Todo Index!")
+	fmt.Fprintln(w, "API v1 Index")
+}
+
+func ApiV1CreateJob(w http.ResponseWriter, r *http.Request) {
+	//TODO
+}
+func ApiV1GetJob(w http.ResponseWriter, r *http.Request) {
+	//TODO
+	vars := mux.Vars(r)
+	id := vars["id"]
+	fmt.Fprintln(w, "Job show:", id)
+}
+func ApiV1DeleteJob(w http.ResponseWriter, r *http.Request) {
+	//TODO
 }
 
 /*
