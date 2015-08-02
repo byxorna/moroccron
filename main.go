@@ -75,7 +75,7 @@ func main() {
 	}
 
 	log.Printf("Bringing up web interface at :%d\n", webPort)
-	router := web.New(*webPort)
+	router := web.New()
 	err = http.ListenAndServe(fmt.Sprintf(":%d", webPort), router)
 	if err != nil {
 		log.Fatalf("Error launching web interface: %s\n", err.Error())
