@@ -9,15 +9,9 @@ import (
 	"time"
 )
 
-func loadJobs() (*JobQueue, error) {
-	//TODO hook me up with some data store
-	//or at least read in from some flat files
-	//jobs := []Job{}
-	return &JobQueue{}, nil
-}
-
 func getLaunchableJobs() ([]Job, error) {
 	//TODO FIXME this should query for all jobs ready to launch
+	//TODO query State for jobs and filter for those which are launchable
 	return []Job{}, nil
 }
 

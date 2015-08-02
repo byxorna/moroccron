@@ -1,7 +1,8 @@
 package scheduler
 
 import (
-	. "github.com/byxorna/moroccron/job"
+	//	. "github.com/byxorna/moroccron/job"
+	"github.com/byxorna/moroccron/state"
 	"github.com/gogo/protobuf/proto"
 
 	log "github.com/golang/glog"
@@ -17,17 +18,14 @@ type Scheduler struct {
 	tasksLaunched int
 	tasksFinished int
 	totalTasks    int
-	Jobs          *JobQueue
-	RunningJobs   map[string]*Job
+	State         state.Storage
+	//RunningJobs   map[string]*Job
 }
 
-func NewScheduler() (*Scheduler, error) {
-	s := Scheduler{}
-	jobs, err := loadJobs()
-	if err != nil {
-		return nil, err
+func NewScheduler(backend state.Storage) (*Scheduler, error) {
+	s := Scheduler{
+		State: backend,
 	}
-	s.Jobs = jobs
 	return &s, nil
 }
 

@@ -14,6 +14,7 @@ import (
 	sched "github.com/mesos/mesos-go/scheduler"
 
 	. "github.com/byxorna/moroccron/scheduler"
+	"github.com/byxorna/moroccron/state/memory"
 	"github.com/byxorna/moroccron/web"
 )
 
@@ -22,8 +23,9 @@ const (
 )
 
 var (
-	master  = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
-	webPort = flag.Int("web-port", 8000, "Port to serve http on (default: 8000)")
+	storageEngine = flag.String("storage", "memory", "Storage backend (memory, ...)")
+	master        = flag.String("master", "127.0.0.1:5050", "Master address <ip:port>")
+	webPort       = flag.Int("web-port", 8000, "Port to serve http on (default: 8000)")
 )
 
 func init() {
@@ -31,10 +33,12 @@ func init() {
 }
 
 func main() {
+	//TODO create a storage backend
+	backend := memory.New()
 
 	// create our scheduler
 	log.Println("Creating scheduler")
-	scheduler, err := NewScheduler()
+	scheduler, err := NewScheduler(backend)
 	if err != nil {
 		log.Fatalf("Unable to create scheduler: %s\n", err.Error())
 		os.Exit(1)
