@@ -16,6 +16,14 @@
 			"Rev": "44145f04b68cf362d9c4df2182967c2275eaefed"
 		},
 		{
+			"ImportPath": "github.com/gorilla/context",
+			"Rev": "50c25fb3b2b3b3cc724e9b6ac75fb44b3bccd0da"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Rev": "e444e69cbd2e2e3e0749a2f3c717cec491552bbf"
+		},
+		{
 			"ImportPath": "github.com/mesos/mesos-go/auth",
 			"Rev": "83b52d7f648d2a2fa91330123d348d4090be2aed"
 		},
