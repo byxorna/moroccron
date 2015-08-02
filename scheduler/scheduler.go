@@ -59,7 +59,7 @@ func (sched *Scheduler) ResourceOffers(driver sched.SchedulerDriver, offers []*m
 
 	for _, ot := range offersAndTasks {
 		if len(ot.Tasks) == 0 {
-			log.Infof("Declining unused offer %s", ot.Offer.Id)
+			log.Infof("Declining unused offer %s", ot.Offer.Id.GetValue())
 			driver.DeclineOffer(ot.Offer.Id, &mesos.Filters{RefuseSeconds: proto.Float64(1)})
 			continue
 		} else {

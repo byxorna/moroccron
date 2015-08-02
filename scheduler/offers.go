@@ -34,6 +34,6 @@ func getOfferMem(offer *mesos.Offer) float64 {
 
 func logOffers(offers []*mesos.Offer) {
 	for _, offer := range offers {
-		log.Infof("Received Offer <%s> with cpus=%v mem=%v", offer.Id.GetValue(), getOfferCpu(offer), getOfferMem(offer))
+		log.Infof("Received Offer %s with cpus=%v mem=%v", offer.Id.GetValue(), getOfferCpu(offer), getOfferMem(offer))
 	}
 }
