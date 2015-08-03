@@ -14,6 +14,7 @@ import (
 	sched "github.com/mesos/mesos-go/scheduler"
 
 	. "github.com/byxorna/moroccron/scheduler"
+	"github.com/byxorna/moroccron/state"
 	"github.com/byxorna/moroccron/state/memory"
 	"github.com/byxorna/moroccron/web"
 )
@@ -33,12 +34,15 @@ func init() {
 }
 
 func main() {
-	//TODO create a storage backend
-	backend := memory.New()
+	// create a storage backend
+	//TODO switch based on storageEngine
+	log.Printf("Creating %s storage driver\n", storageEngine)
+	mem := memory.New()
+	backend := state.Storage(&mem)
 
 	// create our scheduler
 	log.Println("Creating scheduler")
-	scheduler, err := NewScheduler(backend)
+	scheduler, err := NewScheduler(&backend)
 	if err != nil {
 		log.Fatalf("Unable to create scheduler: %s\n", err.Error())
 		os.Exit(1)

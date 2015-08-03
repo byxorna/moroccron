@@ -22,9 +22,9 @@ type Scheduler struct {
 	//RunningJobs   map[string]*Job
 }
 
-func NewScheduler(backend state.Storage) (*Scheduler, error) {
+func NewScheduler(backend *state.Storage) (*Scheduler, error) {
 	s := Scheduler{
-		State: backend,
+		State: *backend,
 	}
 	return &s, nil
 }
